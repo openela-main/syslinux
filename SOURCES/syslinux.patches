@@ -5,3 +5,4 @@ Patch0004: 0004-Add-RPMOPTFLAGS-to-CFLAGS-for-some-stuff.patch
 Patch0005: 0005-Workaround-multiple-definition-of-symbol-errors.patch
 Patch0006: 0006-Replace-builtin-strlen-that-appears-to-get-optimized.patch
 Patch0007: 0007-Fix-backspace-when-editing-a-multiline-cmdline.patch
+Patch0008: 0008-isohybrid-Make-GPT-GUIDs-reproducible-with-uefi-and-.patch

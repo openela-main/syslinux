@@ -7,7 +7,7 @@ Summary: Simple kernel loader which boots from a FAT filesystem
 Name: syslinux
 Version: 6.04
 %define tarball_version 6.04-pre1
-Release: 0.20%{?dist}
+Release: 0.23%{?dist}
 License: GPLv2+
 URL: http://syslinux.zytor.com/wiki/index.php/The_Syslinux_Project
 Source0: http://www.kernel.org/pub/linux/utils/boot/syslinux/%{name}-%{tarball_version}.tar.xz
@@ -35,7 +35,7 @@ BuildRequires: mingw32-gcc
 %endif
 %ifarch x86_64
 Requires: mtools, libc.so.6()(64bit)
-BuildRequires: mingw64-gcc
+BuildRequires: mingw32-gcc mingw64-gcc
 %endif
 
 # NOTE: extlinux belongs in /sbin, not in /usr/sbin, since it is typically
@@ -70,7 +70,7 @@ Requires: syslinux-extlinux-nonlinux = %{version}-%{release}
 The EXTLINUX bootloader, for booting the local system, as well as all
 the SYSLINUX/PXELINUX modules in /boot.
 
-%ifarch %{ix86}
+%ifarch x86_64
 %package tftpboot
 Summary: SYSLINUX modules in /tftpboot, available for network booting
 BuildArch: noarch
@@ -206,7 +206,7 @@ rm -f %{buildroot}%{_includedir}/syslinux.h
 %{_sbindir}/extlinux
 %config /etc/extlinux.conf
 
-%ifarch %{ix86}
+%ifarch x86_64
 %files tftpboot
 /tftpboot
 
@@ -253,6 +253,18 @@ fi
 %endif
 
 %changelog
+* Wed Nov 05 2025 Leo Sandoval <lsandova@redhat.com> - 6.04-0.23
+- Bump release number
+- Resolves: #RHEL-96214
+
+* Fri Jun 13 2025 Leo Sandoval <lsandova@redhat.com> - 6.04-0.22
+- isohybrid: Make GPT GUIDs reproducible with --uefi and --id
+- Resolves: #RHEL-96214
+
+* Mon Jun 16 2025 Leo Sandoval <lsandova@redhat.com> - 6.04-0.21
+- Build tftpboot on x86_64 instead of i686
+- Resolves: #RHEL-97105
+
 * Wed Aug 03 2022 Robbie Harwood <rharwood@redhat.com> - 6.04-0.20
 - Sync with fedora (same NVR)
 - Resolves: #2018260

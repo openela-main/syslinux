@@ -1,0 +1,78 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Chris Riches <chris.riches@nutanix.com>
+Date: Fri, 13 Jun 2025 13:10:03 -0600
+Subject: [PATCH] isohybrid: Make GPT GUIDs reproducible with --uefi and --id
+
+We already have the --id option to make the MBR ID reproducible,
+however the GPT GUIDs are always random, making it impossible to
+hybridise reproducibly with the --uefi option.
+
+Switch from v4 to v5 UUIDs when --id is set, computing them from the MBR
+ID via arbitrary fixed namespaces + SHA1 hashing.
+
+Signed-off-by: Chris Riches <chris.riches at nutanix.com>
+Signed-off-by: Leo Sandoval <lsandova@redhat.com>
+---
+ utils/isohybrid.c | 28 +++++++++++++++++++++++++---
+ 1 file changed, 25 insertions(+), 3 deletions(-)
+
+diff --git a/utils/isohybrid.c b/utils/isohybrid.c
+index 1a203213..681157cd 100644
+--- a/utils/isohybrid.c
++++ b/utils/isohybrid.c
+@@ -48,6 +48,18 @@ unsigned int padding = 0;
+ 
+ uuid_t disk_uuid, part_uuid, iso_uuid;
+ 
++UUID_DEFINE(disk_uuid_ns,
++    0x13, 0x40, 0x46, 0xef, 0x45, 0x39, 0x4c, 0xd6,
++    0x83, 0x23, 0x27, 0xa9, 0x23, 0x77, 0x78, 0x68);
++
++UUID_DEFINE(part_uuid_ns,
++    0x24, 0x08, 0x39, 0x02, 0x5d, 0x03, 0x42, 0x49,
++    0x83, 0xb1, 0x99, 0x76, 0xfb, 0xe7, 0x38, 0x5c);
++
++UUID_DEFINE(iso_uuid_ns,
++    0x50, 0x3a, 0xbc, 0xed, 0xc7, 0xa4, 0x40, 0x1c,
++    0xa1, 0xe3, 0x2c, 0xf6, 0x85, 0x3f, 0xeb, 0x81);
++
+ uint8_t mode = 0;
+ enum { VERBOSE = 1 , EFI = 2 , MAC = 4};
+ 
+@@ -775,6 +787,16 @@ uint32_t chksum_crc32 (unsigned char *block, unsigned int length)
+ 	return (crc ^ 0xFFFFFFFF);
+ }
+ 
++void
++gen_uuid(uuid_t out, const uuid_t ns)
++{
++    if (id) {
++        uuid_generate_sha1(out, ns, (char*)&id, sizeof(id));
++    } else {
++        uuid_generate(out);
++    }
++}
++
+ void
+ reverse_uuid(uuid_t uuid)
+ {
+@@ -815,7 +837,7 @@ initialise_gpt(uint8_t *gpt, uint32_t current, uint32_t alternate, int primary)
+     }
+ 
+     if (primary) {
+-	uuid_generate(disk_uuid);
++        gen_uuid(disk_uuid, disk_uuid_ns);
+ 	reverse_uuid(disk_uuid);
+     }
+ 
+@@ -842,8 +864,8 @@ initialise_gpt(uint8_t *gpt, uint32_t current, uint32_t alternate, int primary)
+ 
+     part = (struct gpt_part_header *)gpt;
+     if (primary) {
+-	uuid_generate(part_uuid);
+-	uuid_generate(iso_uuid);
++        gen_uuid(part_uuid, part_uuid_ns);
++        gen_uuid(iso_uuid, iso_uuid_ns);
+ 	reverse_uuid(part_uuid);
+ 	reverse_uuid(iso_uuid);
+     }
