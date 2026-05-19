@@ -1,0 +1,37 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Leo Sandoval <lsandova@redhat.com>
+Date: Tue, 27 Jan 2026 13:39:11 -0600
+Subject: [PATCH] xfs/xfs_dir2.c: fix use-after-free return
+
+Once on the 'failed' scope, 'ip' is deallocated thus function should return
+NULL instead of the deallocated variable.
+
+Fixes:
+
+    Error: USE_AFTER_FREE (CWE-416): [#def8] [important]
+    syslinux-6.04-pre1/core/fs/xfs/xfs_dir2.c:521:5: freed_arg: "free" frees "ip". [Note: The source code implementation of the function has been overridden by a builtin model.]
+    syslinux-6.04-pre1/core/fs/xfs/xfs_dir2.c:523:5: use_after_free: Using freed pointer "ip".
+    #  521|       free(ip);
+    #  522|
+    #  523|->     return ip;
+    #  524|   }
+    #  525|
+
+Signed-off-by: Leo Sandoval <lsandova@redhat.com>
+---
+ core/fs/xfs/xfs_dir2.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/core/fs/xfs/xfs_dir2.c b/core/fs/xfs/xfs_dir2.c
+index 2f5928a5..e73e45f1 100644
+--- a/core/fs/xfs/xfs_dir2.c
++++ b/core/fs/xfs/xfs_dir2.c
+@@ -520,7 +520,7 @@ found:
+ failed:
+     free(ip);
+ 
+-    return ip;
++    return NULL;
+ }
+ 
+ static xfs_fsblock_t

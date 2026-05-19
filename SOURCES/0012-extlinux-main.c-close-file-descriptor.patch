@@ -1,0 +1,37 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Leo Sandoval <lsandova@redhat.com>
+Date: Tue, 27 Jan 2026 14:00:55 -0600
+Subject: [PATCH] extlinux/main.c: close file descriptor
+
+Fixes:
+
+    Error: RESOURCE_LEAK (CWE-772): [#def14] [important]
+    syslinux-6.04-pre1/extlinux/main.c:623:5: open_fn: Returning handle opened by "open". [Note: The source code implementation of the function has been overridden by a user model.]
+    syslinux-6.04-pre1/extlinux/main.c:623:5: var_assign: Assigning: "fd" = handle returned from "open(c32file, 1053249, 292)".
+    syslinux-6.04-pre1/extlinux/main.c:630:5: noescape: Resource "fd" is not freed or pointed-to in "xpwrite".
+    syslinux-6.04-pre1/extlinux/main.c:640:5: leaked_handle: Handle variable "fd" going out of scope leaks the handle.
+    #  638|       free(oldfile);
+    #  639|       free(c32file);
+    #  640|->     return 0;
+    #  641|
+    #  642|   bail:
+
+Signed-off-by: Leo Sandoval <lsandova@redhat.com>
+---
+ extlinux/main.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/extlinux/main.c b/extlinux/main.c
+index ebff7eae..8171c025 100644
+--- a/extlinux/main.c
++++ b/extlinux/main.c
+@@ -634,6 +634,9 @@ int ext2_fat_install_file(const char *path, int devfd, struct stat *rst)
+ 	goto bail;
+     }
+ 
++    if (fd >= 0)
++	close(fd);
++
+     free(file);
+     free(oldfile);
+     free(c32file);

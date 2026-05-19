@@ -1,0 +1,37 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Leo Sandoval <lsandova@redhat.com>
+Date: Tue, 27 Jan 2026 14:15:10 -0600
+Subject: [PATCH] libinstaller/advio.c: deallocated string
+
+Fixes:
+
+    Error: RESOURCE_LEAK (CWE-772): [#def26] [important]
+    syslinux-6.04-pre1/libinstaller/advio.c:104:5: alloc_arg: "asprintf" allocates memory that is stored into "file". [Note: The source code implementation of the function has been overridden by a builtin model.]
+    syslinux-6.04-pre1/libinstaller/advio.c:112:5: noescape: Resource "file" is not freed or pointed-to in "open". [Note: The source code implementation of the function has been overridden by a user model.]
+    syslinux-6.04-pre1/libinstaller/advio.c:132:6: noescape: Resource "file" is not freed or pointed-to in "open". [Note: The source code implementation of the function has been overridden by a user model.]
+    syslinux-6.04-pre1/libinstaller/advio.c:134:3: noescape: Resource "file" is not freed or pointed-to in "fprintf". [Note: The source code implementation of the function has been overridden by a builtin model.]
+    syslinux-6.04-pre1/libinstaller/advio.c:135:3: leaked_storage: Variable "file" going out of scope leaks the storage it points to.
+    #  133|   	    if (fd < 0) {
+    #  134|   		fprintf(stderr, "Cannot open file '%s' in read/write mode !\nFatal error, exiting.\n", file);
+    #  135|-> 		return -EACCES;
+    #  136|   	    } else if (fstat(fd, &xst) || xst.st_ino != st.st_ino ||
+    #  137|   		       xst.st_dev != st.st_dev || xst.st_size != st.st_size) {
+
+Signed-off-by: Leo Sandoval <lsandova@redhat.com>
+---
+ libinstaller/advio.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/libinstaller/advio.c b/libinstaller/advio.c
+index e282e11c..65e70715 100644
+--- a/libinstaller/advio.c
++++ b/libinstaller/advio.c
+@@ -132,6 +132,8 @@ int write_adv(const char *path, const char *cfg)
+ 	    fd = open(file, O_RDWR | O_SYNC);
+ 	    if (fd < 0) {
+ 		fprintf(stderr, "Cannot open file '%s' in read/write mode !\nFatal error, exiting.\n", file);
++		if (file)
++		    free(file);
+ 		return -EACCES;
+ 	    } else if (fstat(fd, &xst) || xst.st_ino != st.st_ino ||
+ 		       xst.st_dev != st.st_dev || xst.st_size != st.st_size) {

@@ -1,0 +1,43 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Leo Sandoval <lsandova@redhat.com>
+Date: Tue, 27 Jan 2026 13:44:05 -0600
+Subject: [PATCH] efi/console.c: initialized pointer to NULL
+
+Fixes:
+
+    Error: UNINIT (CWE-457): [#def9] [important]
+    syslinux-6.04-pre1/efi/console.c:242:2: var_decl: Declaring variable "first" without initializer.
+    syslinux-6.04-pre1/efi/console.c:271:3: uninit_use: Using uninitialized value "first".
+    #  269|   					   &depth, &refresh);
+    #  270|
+    #  271|-> 		if (status == EFI_SUCCESS && (!first || pciio)) {
+    #  272|   			width = w;
+    #  273|   			height = h;
+
+    Error: UNINIT (CWE-457): [#def10] [important]
+    syslinux-6.04-pre1/efi/console.c:242:2: var_decl: Declaring variable "first" without initializer.
+    syslinux-6.04-pre1/efi/console.c:282:2: uninit_use: Using uninitialized value "first".
+    #  280|   	}
+    #  281|
+    #  282|-> 	if (!first)
+    #  283|   		goto out;
+    #  284|   	rv = 1;
+
+Signed-off-by: Leo Sandoval <lsandova@redhat.com>
+---
+ efi/console.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/efi/console.c b/efi/console.c
+index d7ed0b4a..206a8131 100644
+--- a/efi/console.c
++++ b/efi/console.c
+@@ -239,7 +239,7 @@ struct _EFI_UGA_DRAW_PROTOCOL {
+ 
+ static int setup_uga(struct screen_info *si)
+ {
+-	EFI_UGA_DRAW_PROTOCOL *uga, *first;
++	EFI_UGA_DRAW_PROTOCOL *uga, *first = NULL;
+ 	EFI_GUID UgaProtocol = EFI_UGA_PROTOCOL_GUID;
+ 	UINT32 width, height;
+ 	EFI_STATUS status;

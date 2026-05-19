@@ -1,0 +1,97 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Leo Sandoval <lsandova@redhat.com>
+Date: Tue, 27 Jan 2026 14:26:15 -0600
+Subject: [PATCH] extlinux/main.c: deallocate devname string before return
+
+Fixes:
+
+    Error: RESOURCE_LEAK (CWE-772): [#def20] [important]
+    syslinux-6.04-pre1/extlinux/main.c:1478:5: alloc_arg: "open_device" allocates memory that is stored into "devname".
+    syslinux-6.04-pre1/extlinux/main.c:1486:2: leaked_storage: Variable "devname" going out of scope leaks the storage it points to.
+    # 1484|   		program);
+    # 1485|   	close(devfd);
+    # 1486|-> 	return 1;
+    # 1487|       }
+    # 1488|
+
+    Error: RESOURCE_LEAK (CWE-772): [#def21] [important]
+    syslinux-6.04-pre1/extlinux/main.c:1478:5: alloc_arg: "open_device" allocates memory that is stored into "devname".
+    syslinux-6.04-pre1/extlinux/main.c:1494:2: leaked_storage: Variable "devname" going out of scope leaks the storage it points to.
+    # 1492|       } else if (ext_read_adv(path, devfd, NULL) < 0) {
+    # 1493|   	close(devfd);
+    # 1494|-> 	return 1;
+    # 1495|       }
+    # 1496|
+
+    Error: RESOURCE_LEAK (CWE-772): [#def22] [important]
+    syslinux-6.04-pre1/extlinux/main.c:1478:5: alloc_arg: "open_device" allocates memory that is stored into "devname".
+    syslinux-6.04-pre1/extlinux/main.c:1499:2: leaked_storage: Variable "devname" going out of scope leaks the storage it points to.
+    # 1497|       if (modify_adv() < 0) {
+    # 1498|   	close(devfd);
+    # 1499|-> 	return 1;
+    # 1500|       }
+    # 1501|
+
+    Error: RESOURCE_LEAK (CWE-772): [#def23] [important]
+    syslinux-6.04-pre1/extlinux/main.c:1478:5: alloc_arg: "open_device" allocates memory that is stored into "devname".
+    syslinux-6.04-pre1/extlinux/main.c:1505:2: leaked_storage: Variable "devname" going out of scope leaks the storage it points to.
+    # 1503|       if (install_file(path, devfd, &fst)) {
+    # 1504|   	close(devfd);
+    # 1505|-> 	return 1;
+    # 1506|       }
+    # 1507|       if (fst.st_dev != st.st_dev) {
+
+    Error: RESOURCE_LEAK (CWE-772): [#def24] [important]
+    syslinux-6.04-pre1/extlinux/main.c:1478:5: alloc_arg: "open_device" allocates memory that is stored into "devname".
+    syslinux-6.04-pre1/extlinux/main.c:1511:2: leaked_storage: Variable "devname" going out of scope leaks the storage it points to.
+    # 1509|   		program);
+    # 1510|   	close(devfd);
+    # 1511|-> 	return 1;
+    # 1512|       }
+    # 1513|
+
+Signed-off-by: Leo Sandoval <lsandova@redhat.com>
+---
+ extlinux/main.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/extlinux/main.c b/extlinux/main.c
+index 8171c025..a920cd2a 100644
+--- a/extlinux/main.c
++++ b/extlinux/main.c
+@@ -1485,6 +1485,7 @@ static int install_loader(const char *path, int update_only)
+     if (update_only && !syslinux_already_installed(devfd)) {
+ 	fprintf(stderr, "%s: no previous syslinux boot sector found\n",
+ 		program);
++	free(devname);
+ 	close(devfd);
+ 	return 1;
+     }
+@@ -1493,23 +1494,27 @@ static int install_loader(const char *path, int update_only)
+     if (opt.reset_adv) {
+ 	syslinux_reset_adv(syslinux_adv);
+     } else if (ext_read_adv(path, devfd, NULL) < 0) {
++	free(devname);
+ 	close(devfd);
+ 	return 1;
+     }
+ 
+     if (modify_adv() < 0) {
++	free(devname);
+ 	close(devfd);
+ 	return 1;
+     }
+ 
+     /* Install ldlinux.sys */
+     if (install_file(path, devfd, &fst)) {
++	free(devname);
+ 	close(devfd);
+ 	return 1;
+     }
+     if (fst.st_dev != st.st_dev) {
+ 	fprintf(stderr, "%s: file system changed under us - aborting!\n",
+ 		program);
++	free(devname);
+ 	close(devfd);
+ 	return 1;
+     }

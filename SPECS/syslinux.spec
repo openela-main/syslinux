@@ -10,7 +10,7 @@ Summary: Simple kernel loader which boots from a FAT filesystem
 Name: syslinux
 Version: 6.04
 %define tarball_version 6.04-pre1
-Release: 0.30%{?dist}
+Release: 0.34%{?dist}
 License: GPL-2.0-or-later
 URL: http://syslinux.zytor.com/wiki/index.php/The_Syslinux_Project
 Source0: http://www.kernel.org/pub/linux/utils/boot/syslinux/%{name}-%{tarball_version}.tar.xz
@@ -23,6 +23,11 @@ Patch0006: 0006-Replace-builtin-strlen-that-appears-to-get-optimized.patch
 Patch0007: 0007-Fix-backspace-when-editing-a-multiline-cmdline.patch
 Patch0008: 0008-Fix-build-with-GCC-14.patch
 Patch0009: 0009-Rewrite_Digest_SHA1_to_SHA.patch
+Patch0010: 0010-xfs-xfs_dir2.c-fix-use-after-free-return.patch
+Patch0011: 0011-efi-console.c-initialized-pointer-to-NULL.patch
+Patch0012: 0012-extlinux-main.c-close-file-descriptor.patch
+Patch0013: 0013-libinstaller-advio.c-deallocated-string.patch
+Patch0014: 0014-extlinux-main.c-deallocate-devname-string-before-ret.patch
 
 # this is to keep rpmbuild from thinking the .c32 / .com / .0 / memdisk files
 # in noarch packages are a reason to stop the build.
@@ -262,6 +267,22 @@ fi
 %endif
 
 %changelog
+* Tue Jan 27 2026 Leo Sandoval <lsandova@redhat.com> - 6.04-0.34
+- Fix more SAST true findings
+- Resolves: #RHEL-51170
+
+* Thu Dec 18 2025 Leo Sandoval <lsandova@redhat.com> - 6.04-0.33
+- Bump release number
+- Resolves: #RHEL-51170
+
+* Tue Mar 18 2025 Leo Sandoval <lsandova@redhat.com> - 6.04-0.32
+- Bump version and include previous resolves ticket number on commit message
+- Resolves: #RHEL-51170
+
+* Wed Feb 19 2025 Leo Sandoval <lsandova@redhat.com> - 6.04-0.31
+- Fix true positives SAST findings
+- Resolves: #RHEL-51170
+
 * Tue Oct 29 2024 Troy Dawson <tdawson@redhat.com> - 6.04-0.30
 - Bump release for October 2024 mass rebuild:
   Resolves: RHEL-64018
