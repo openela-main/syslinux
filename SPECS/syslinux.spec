@@ -7,7 +7,7 @@ Summary: Simple kernel loader which boots from a FAT filesystem
 Name: syslinux
 Version: 6.04
 %define tarball_version 6.04-pre1
-Release: 0.23%{?dist}
+Release: 0.24%{?dist}
 License: GPLv2+
 URL: http://syslinux.zytor.com/wiki/index.php/The_Syslinux_Project
 Source0: http://www.kernel.org/pub/linux/utils/boot/syslinux/%{name}-%{tarball_version}.tar.xz
@@ -253,6 +253,12 @@ fi
 %endif
 
 %changelog
+* Tue Apr 07 2026 Josue Hernandez <josherna@redhat.com> - 6.04-0.24
+- Update zlib version to zlib-1.2.11
+- Resolves: #RHEL-165389
+- Resolves: CVE-2022-37434 CVE-2018-25032 CVE-2016-9840
+- Resolves: CVE-2016-9841 CVE-2016-9842 CVE-2016-9843
+
 * Wed Nov 05 2025 Leo Sandoval <lsandova@redhat.com> - 6.04-0.23
 - Bump release number
 - Resolves: #RHEL-96214
