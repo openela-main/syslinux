@@ -10,7 +10,7 @@ Summary: Simple kernel loader which boots from a FAT filesystem
 Name: syslinux
 Version: 6.04
 %define tarball_version 6.04-pre1
-Release: 0.34%{?dist}
+Release: 0.35%{?dist}
 License: GPL-2.0-or-later
 URL: http://syslinux.zytor.com/wiki/index.php/The_Syslinux_Project
 Source0: http://www.kernel.org/pub/linux/utils/boot/syslinux/%{name}-%{tarball_version}.tar.xz
@@ -28,6 +28,7 @@ Patch0011: 0011-efi-console.c-initialized-pointer-to-NULL.patch
 Patch0012: 0012-extlinux-main.c-close-file-descriptor.patch
 Patch0013: 0013-libinstaller-advio.c-deallocated-string.patch
 Patch0014: 0014-extlinux-main.c-deallocate-devname-string-before-ret.patch
+Patch0015: 0015-zlib-update-to-version-1.2.11.patch
 
 # this is to keep rpmbuild from thinking the .c32 / .com / .0 / memdisk files
 # in noarch packages are a reason to stop the build.
@@ -267,6 +268,12 @@ fi
 %endif
 
 %changelog
+* Tue Mar 31 2026 Josue Hernandez <josherna@redhat.com> - 6.04-0.35
+- Update zlib version to zlib-1.2.11
+- Resolves: #RHEL-156979
+- Resolves: CVE-2022-37434 CVE-2018-25032 CVE-2016-9840
+- Resolves: CVE-2016-9841 CVE-2016-9842 CVE-2016-9843
+
 * Tue Jan 27 2026 Leo Sandoval <lsandova@redhat.com> - 6.04-0.34
 - Fix more SAST true findings
 - Resolves: #RHEL-51170
